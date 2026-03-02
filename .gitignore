@@ -1,0 +1,20 @@
+# Markdown и сгенерированные документы
+*.md
+*.docx
+
+# Переменные окружения
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# Бинарники
+bot
+*.exe
+
+# Go
+vendor/
+
+# OS
+.DS_Store
