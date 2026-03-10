@@ -29,6 +29,11 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   bot:
     image: ${DOCKER_USERNAME}/tg-bot:latest
@@ -49,6 +54,8 @@ services:
       - "${HTTP_PORT:-8080}:${HTTP_PORT:-8080}"
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
 volumes:
