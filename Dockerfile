@@ -8,6 +8,7 @@ RUN go mod download
 COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o bot ./cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o createadmin ./cmd/createadmin/main.go
 
 FROM alpine:3.21
 
@@ -16,5 +17,6 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
 COPY --from=builder /app/bot .
+COPY --from=builder /app/createadmin .
 
 CMD ["./bot"]
