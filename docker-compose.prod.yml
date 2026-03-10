@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tutorbot
+      POSTGRES_USER: tutorbot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tutorbot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  bot:
+    image: ${DOCKER_USERNAME}/tg-bot:latest
+    restart: unless-stopped
+    environment:
+      BOT_TOKEN:           ${BOT_TOKEN}
+      DATABASE_URL:        postgres://tutorbot:${POSTGRES_PASSWORD}@postgres:5432/tutorbot?sslmode=disable
+      REDIS_ADDR:          redis:6379
+      REDIS_PASSWORD:      ${REDIS_PASSWORD:-}
+      RABBITMQ_URL:        amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672/
+      ADMIN_CHAT_ID:       ${ADMIN_CHAT_ID}
+      HTTP_PORT:           ${HTTP_PORT:-8080}
+      ADMIN_JWT_SECRET:    ${ADMIN_JWT_SECRET}
+      LOG_LEVEL:           ${LOG_LEVEL:-info}
+      MAX_ACTIVE_BOOKINGS: ${MAX_ACTIVE_BOOKINGS:-3}
+      WEBHOOK_URL:         ${WEBHOOK_URL:-}
+    ports:
+      - "${HTTP_PORT:-8080}:${HTTP_PORT:-8080}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
