@@ -1,17 +1,21 @@
+-- migrations/007_triggers.sql
 -- +goose Up
 
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
-RETURN NEW;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+-- +goose StatementEnd
 
 CREATE TRIGGER trg_bookings_updated_at
     BEFORE UPDATE ON bookings
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION mark_slot_unavailable()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -19,11 +23,13 @@ UPDATE time_slots SET is_available = FALSE WHERE id = NEW.slot_id;
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+-- +goose StatementEnd
 
 CREATE TRIGGER trg_booking_created
     AFTER INSERT ON bookings
     FOR EACH ROW EXECUTE FUNCTION mark_slot_unavailable();
 
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION release_slot_on_cancel()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -33,6 +39,7 @@ END IF;
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+-- +goose StatementEnd
 
 CREATE TRIGGER trg_booking_cancelled
     AFTER UPDATE ON bookings
