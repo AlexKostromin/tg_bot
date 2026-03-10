@@ -1,0 +1,766 @@
+basePath: /api/admin
+definitions:
+  dto.BookingListResponse:
+    properties:
+      items: {}
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.BookingResponse:
+    properties:
+      booked_at:
+        type: string
+      comment:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      slot_date:
+        type: string
+      slot_id:
+        type: integer
+      start_time:
+        type: string
+      status:
+        type: string
+      subject_name:
+        type: string
+      user_id:
+        type: integer
+      user_name:
+        type: string
+      user_phone:
+        type: string
+    type: object
+  dto.BulkCreateSlotRequest:
+    properties:
+      slots:
+        items:
+          $ref: '#/definitions/dto.CreateSlotRequest'
+        type: array
+    required:
+    - slots
+    type: object
+  dto.ChartDataPoint:
+    properties:
+      count:
+        type: integer
+      date:
+        type: string
+    type: object
+  dto.CreateSlotRequest:
+    properties:
+      class_group_id:
+        type: integer
+      end_time:
+        type: string
+      slot_date:
+        type: string
+      start_time:
+        type: string
+      subject_id:
+        type: integer
+      tutor_id:
+        type: integer
+    required:
+    - class_group_id
+    - end_time
+    - slot_date
+    - start_time
+    - subject_id
+    - tutor_id
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  dto.SlotListResponse:
+    properties:
+      items: {}
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.SlotResponse:
+    properties:
+      class_group_id:
+        type: integer
+      end_time:
+        type: string
+      group_name:
+        type: string
+      id:
+        type: integer
+      is_available:
+        type: boolean
+      slot_date:
+        type: string
+      start_time:
+        type: string
+      subject_id:
+        type: integer
+      subject_name:
+        type: string
+      tutor_id:
+        type: integer
+      tutor_name:
+        type: string
+    type: object
+  dto.StatsResponse:
+    properties:
+      bookings_chart:
+        items:
+          $ref: '#/definitions/dto.ChartDataPoint'
+        type: array
+      bookings_today:
+        type: integer
+      bookings_total:
+        type: integer
+      confirmed_total:
+        type: integer
+      users_total:
+        type: integer
+    type: object
+  dto.UpdateBookingStatus:
+    properties:
+      comment:
+        type: string
+      status:
+        enum:
+        - pending
+        - confirmed
+        - cancelled
+        - completed
+        type: string
+    required:
+    - status
+    type: object
+  dto.UpdateUserRequest:
+    properties:
+      is_active:
+        type: boolean
+    type: object
+  dto.UserListResponse:
+    properties:
+      items: {}
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.UserResponse:
+    properties:
+      chat_id:
+        type: integer
+      class_group_id:
+        type: integer
+      class_number:
+        type: integer
+      created_at:
+        type: string
+      full_name:
+        type: string
+      group_name:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      phone:
+        type: string
+    type: object
+  dto.ValidationErrorResponse:
+    properties:
+      error:
+        type: string
+      fields:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API for managing tutoring bookings
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Tutor Bot API
+  version: "1.0"
+paths:
+  /admin/bookings:
+    get:
+      parameters:
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: string
+      - description: Фильтр по ученику
+        in: query
+        name: user_id
+        type: integer
+      - description: Фильтр по дате (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      - default: 1
+        description: Страница
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Размер страницы
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BookingListResponse'
+      security:
+      - BearerAuth: []
+      summary: Список броней
+      tags:
+      - bookings
+  /admin/bookings/{id}:
+    get:
+      parameters:
+      - description: ID брони
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BookingResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить бронь по ID
+      tags:
+      - bookings
+  /admin/bookings/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID брони
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новый статус
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBookingStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BookingResponse'
+      security:
+      - BearerAuth: []
+      summary: Сменить статус брони
+      tags:
+      - bookings
+  /admin/class-groups:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: object
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Список групп классов
+      tags:
+      - class-groups
+  /admin/slots:
+    get:
+      parameters:
+      - description: Фильтр по дате (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      - description: ID группы классов
+        in: query
+        name: group_id
+        type: integer
+      - description: Только доступные
+        in: query
+        name: available
+        type: boolean
+      - default: 1
+        description: Страница
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Размер страницы
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SlotListResponse'
+      security:
+      - BearerAuth: []
+      summary: Список временных слотов
+      tags:
+      - slots
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные слота
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateSlotRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SlotResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/dto.ValidationErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создать слот
+      tags:
+      - slots
+  /admin/slots/{id}:
+    delete:
+      parameters:
+      - description: ID слота
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "409":
+          description: Слот забронирован
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удалить слот
+      tags:
+      - slots
+    get:
+      parameters:
+      - description: ID слота
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SlotResponse'
+      security:
+      - BearerAuth: []
+      summary: Один слот
+      tags:
+      - slots
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID слота
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные слота
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateSlotRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SlotResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновить слот
+      tags:
+      - slots
+  /admin/slots/bulk:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Массив слотов
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BulkCreateSlotRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SlotListResponse'
+      security:
+      - BearerAuth: []
+      summary: Создать несколько слотов
+      tags:
+      - slots
+  /admin/stats:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.StatsResponse'
+      security:
+      - BearerAuth: []
+      summary: Статистика для дашборда
+      tags:
+      - stats
+  /admin/subjects:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: object
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Список предметов
+      tags:
+      - subjects
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные предмета (name обязателен)
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать предмет
+      tags:
+      - subjects
+  /admin/subjects/{id}:
+    delete:
+      parameters:
+      - description: ID предмета
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Удалить предмет
+      tags:
+      - subjects
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID предмета
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные предмета
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить предмет
+      tags:
+      - subjects
+  /admin/tutors:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: object
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Список репетиторов
+      tags:
+      - tutors
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные репетитора (full_name обязателен, tg_chat_id опционален)
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать репетитора
+      tags:
+      - tutors
+  /admin/tutors/{id}:
+    delete:
+      parameters:
+      - description: ID репетитора
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Удалить репетитора
+      tags:
+      - tutors
+    get:
+      parameters:
+      - description: ID репетитора
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить репетитора по ID
+      tags:
+      - tutors
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID репетитора
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные репетитора
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить репетитора
+      tags:
+      - tutors
+  /admin/users:
+    get:
+      parameters:
+      - description: Поиск по имени/телефону
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Страница
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Размер страницы
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserListResponse'
+      security:
+      - BearerAuth: []
+      summary: Список пользователей
+      tags:
+      - users
+  /admin/users/{id}:
+    get:
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+      security:
+      - BearerAuth: []
+      summary: Один пользователь
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновить пользователя (блокировка)
+      tags:
+      - users
+  /api/admin/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Учетные данные (username и password обязательны)
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Неверный формат или отсутствуют поля
+          schema:
+            type: object
+        "401":
+          description: Неверные учетные данные
+          schema:
+            type: object
+      summary: Аутентификация администратора
+      tags:
+      - auth
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
