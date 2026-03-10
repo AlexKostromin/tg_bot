@@ -10,7 +10,7 @@
 .vscode/
 
 # Бинарники
-bot
+/bot
 *.exe
 
 # Go
