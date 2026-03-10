@@ -1,0 +1,67 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main  # деплой запускается только при пуше в main
+
+env:
+  IMAGE_NAME: tg-bot
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest  # GitHub предоставляет виртуальную машину с Ubuntu
+
+    steps:
+      # 1. Скачиваем код репозитория в runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Настраиваем Docker Buildx (поддержка кэширования слоёв)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Логинимся в Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 4. Собираем образ и пушим на Docker Hub
+      # cache-from/cache-to — кэшируем слои между запусками, ускоряет сборку
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 5. Подключаемся по SSH и обновляем контейнеры на сервере
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /opt/tg-bot
+
+            # Обновляем .env (переменные берутся из секретов GitHub)
+            cat > .env << EOF
+            BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+            ADMIN_CHAT_ID=${{ secrets.ADMIN_CHAT_ID }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            EOF
+
+            # Скачиваем новый образ и перезапускаем контейнеры
+            docker compose pull
+            docker compose up -d --remove-orphans
+
+            # Удаляем старые неиспользуемые образы
+            docker image prune -f
