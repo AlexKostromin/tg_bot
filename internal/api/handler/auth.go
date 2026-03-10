@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/username/tg_bot/internal/repository"
+	"github.com/AlexKostromin/tg_bot/internal/repository"
 )
 
 type AuthHandler struct {

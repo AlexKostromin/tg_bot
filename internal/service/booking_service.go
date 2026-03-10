@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/username/tg_bot/internal/config"
-	"github.com/username/tg_bot/internal/repository"
+	"github.com/AlexKostromin/tg_bot/internal/config"
+	"github.com/AlexKostromin/tg_bot/internal/repository"
 )
 
 // BookingService — сервисный слой для бронирования занятий.

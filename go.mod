@@ -1,4 +1,4 @@
-module github.com/username/tg_bot
+module github.com/AlexKostromin/tg_bot
 
 go 1.25.0
 

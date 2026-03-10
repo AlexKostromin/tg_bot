@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/username/tg_bot/internal/repository"
+	"github.com/AlexKostromin/tg_bot/internal/repository"
 	"net/http"
 )
 

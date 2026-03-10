@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/username/tg_bot/internal/config"
-	"github.com/username/tg_bot/internal/db"
-	"github.com/username/tg_bot/internal/repository"
+	"github.com/AlexKostromin/tg_bot/internal/config"
+	"github.com/AlexKostromin/tg_bot/internal/db"
+	"github.com/AlexKostromin/tg_bot/internal/repository"
 )
 
 func main() {

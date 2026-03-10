@@ -12,11 +12,11 @@ import (
 	"github.com/rs/zerolog/log"
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	"github.com/username/tg_bot/internal/api/handler"
-	"github.com/username/tg_bot/internal/api/middleware"
-	"github.com/username/tg_bot/internal/config"
-	"github.com/username/tg_bot/internal/mq"
-	"github.com/username/tg_bot/internal/repository"
+	"github.com/AlexKostromin/tg_bot/internal/api/handler"
+	"github.com/AlexKostromin/tg_bot/internal/api/middleware"
+	"github.com/AlexKostromin/tg_bot/internal/config"
+	"github.com/AlexKostromin/tg_bot/internal/mq"
+	"github.com/AlexKostromin/tg_bot/internal/repository"
 )
 
 type Server struct {

@@ -29,16 +29,16 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
-	"github.com/username/tg_bot/docs"
-	"github.com/username/tg_bot/internal/api"
-	"github.com/username/tg_bot/internal/bot"
-	"github.com/username/tg_bot/internal/config"
-	"github.com/username/tg_bot/internal/db"
-	"github.com/username/tg_bot/internal/fsm"
-	"github.com/username/tg_bot/internal/mq"
-	"github.com/username/tg_bot/internal/repository"
-	"github.com/username/tg_bot/internal/scheduler"
-	"github.com/username/tg_bot/internal/service"
+	"github.com/AlexKostromin/tg_bot/docs"
+	"github.com/AlexKostromin/tg_bot/internal/api"
+	"github.com/AlexKostromin/tg_bot/internal/bot"
+	"github.com/AlexKostromin/tg_bot/internal/config"
+	"github.com/AlexKostromin/tg_bot/internal/db"
+	"github.com/AlexKostromin/tg_bot/internal/fsm"
+	"github.com/AlexKostromin/tg_bot/internal/mq"
+	"github.com/AlexKostromin/tg_bot/internal/repository"
+	"github.com/AlexKostromin/tg_bot/internal/scheduler"
+	"github.com/AlexKostromin/tg_bot/internal/service"
 )
 
 func main() {

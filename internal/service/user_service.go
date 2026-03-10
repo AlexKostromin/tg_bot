@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/username/tg_bot/internal/repository"
+	"github.com/AlexKostromin/tg_bot/internal/repository"
 )
 
 // ClassGroupByNumber определяет группу классов по номеру класса ученика.

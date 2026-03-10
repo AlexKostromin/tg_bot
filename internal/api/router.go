@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/username/tg_bot/internal/api/handler"
+	"github.com/AlexKostromin/tg_bot/internal/api/handler"
 )
 
 func mountRoutes(r chi.Router, deps Dependencies) {

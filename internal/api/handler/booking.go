@@ -6,9 +6,9 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/username/tg_bot/internal/api/dto"
-	"github.com/username/tg_bot/internal/mq"
-	"github.com/username/tg_bot/internal/repository"
+	"github.com/AlexKostromin/tg_bot/internal/api/dto"
+	"github.com/AlexKostromin/tg_bot/internal/mq"
+	"github.com/AlexKostromin/tg_bot/internal/repository"
 )
 
 type BookingHandler struct {
