@@ -91,14 +91,18 @@ func main() {
 	// FSM
 	fsmStorage := fsm.NewStorage(rdb)
 
+	// Graceful shutdown context
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	// RabbitMQ consumer
 	notifySvc := &bot.NotificationService{BookingRepo: bookingRepo}
 	consumer := mq.NewConsumer(mqConn, notifySvc)
-	go consumer.Run(context.Background())
+	go consumer.Run(ctx)
 
-	// Slot scheduler — поддерживает окно слотов в 2 недели
-	slotScheduler := scheduler.NewSlotScheduler(database, 17)
-	go slotScheduler.Run(context.Background())
+	// Slot scheduler — поддерживает окно слотов в 2 недели для всех репетиторов
+	slotScheduler := scheduler.NewSlotScheduler(database)
+	go slotScheduler.Run(ctx)
 
 	// HTTP API server
 	apiServer := api.NewServer(api.Dependencies{
@@ -134,10 +138,6 @@ func main() {
 		log.Fatal().Err(err).Msg("bot init failed")
 	}
 	notifySvc.SetAPI(b.API())
-
-	// Graceful shutdown
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
 
 	go b.Run(cfg)
 

@@ -10,13 +10,13 @@ import (
 
 // SlotScheduler каждый день создаёт слоты на 14-й день вперёд,
 // чтобы окно в 2 недели всегда было заполнено.
+// Слоты создаются для ВСЕХ репетиторов из таблицы tutors.
 type SlotScheduler struct {
-	db      *sqlx.DB
-	tutorID int
+	db *sqlx.DB
 }
 
-func NewSlotScheduler(db *sqlx.DB, tutorID int) *SlotScheduler {
-	return &SlotScheduler{db: db, tutorID: tutorID}
+func NewSlotScheduler(db *sqlx.DB) *SlotScheduler {
+	return &SlotScheduler{db: db}
 }
 
 func (s *SlotScheduler) Run(ctx context.Context) {
@@ -41,20 +41,21 @@ func (s *SlotScheduler) Run(ctx context.Context) {
 	}
 }
 
-// generateSlots создаёт слоты с CURRENT_DATE+fromDay по CURRENT_DATE+toDay.
-// INSERT ... ON CONFLICT DO NOTHING — не дублирует существующие.
+// generateSlots создаёт слоты с CURRENT_DATE+fromDay по CURRENT_DATE+toDay
+// для всех репетиторов. INSERT ... ON CONFLICT DO NOTHING — не дублирует.
 func (s *SlotScheduler) generateSlots(ctx context.Context, fromDay, toDay int) {
 	res, err := s.db.ExecContext(ctx, `
 		INSERT INTO time_slots (tutor_id, subject_id, class_group_id, slot_date, start_time, end_time)
-		SELECT $1, s.id, g.id, d::date,
+		SELECT t.id, s.id, g.id, d::date,
 		       make_time(h, 0, 0), make_time(h + 1, 0, 0)
-		FROM generate_series(CURRENT_DATE + ($2::int), CURRENT_DATE + ($3::int), interval '1 day') AS d
+		FROM tutors t
+		CROSS JOIN generate_series(CURRENT_DATE + ($1::int), CURRENT_DATE + ($2::int), interval '1 day') AS d
 		CROSS JOIN generate_series(9, 19) AS h
 		CROSS JOIN subjects s
 		CROSS JOIN class_groups g
 		WHERE EXTRACT(DOW FROM d::date) <> 0
 		ON CONFLICT DO NOTHING`,
-		s.tutorID, fromDay, toDay,
+		fromDay, toDay,
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("scheduler: failed to generate slots")
